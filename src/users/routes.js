@@ -23,5 +23,15 @@ router.post('/register',[
 router.get('/verify/:token',[
     check('token','ERROR').notEmpty().trim().isSlug(),
     
+    
 ],controller.verifyEmail);
+
+router.post('/resetpassword',[
+    check('_token','ERROR').notEmpty().trim().isSlug(),
+    check('password_new','Mật khẩu mới không được bỏ trống').isLength({min:3,max:100}).notEmpty(),
+    check('confirm_password','Nhập lại mật khẩu mới không được bỏ trống').isLength({min:3,max:100}).notEmpty()
+    .custom((value, {req}) => value === req.body.password).withMessage("The passwords do not match")
+],controller.resetPassword);
+
+router.post('/forgot',controller.forgotPassword);
 module.exports=router;

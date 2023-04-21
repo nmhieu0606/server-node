@@ -5,9 +5,14 @@ var sendMail= require('../../mail/sendmail')
 var jwtTokens =require('../utils/jwt-helpers')
 const jwt = require("jsonwebtoken");
 
+ 
+// Using redis backend
 // import jwt from '../utils/jwt-helpers';
 const pool = require("../../db");
+
+
 const getUsers = (req, res) => {
+  
   pool.query("select * from users", (error, result) => {
     if (error) throw error;
     res.status(200).json(result.rows);
@@ -15,6 +20,7 @@ const getUsers = (req, res) => {
 };
 
 const login =async (req, res) => {
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.json(errors);
@@ -24,7 +30,7 @@ const login =async (req, res) => {
 
     const { password } = req.body;
 
-   await pool.query('select username from users where email=($1) and status=1',[email],(error,result)=>{
+    await pool.query('select username from users where email=($1) and status=1',[email],(error,result)=>{
       if(error) throw error;
       if(result.rows[0]!=null){
         pool.query(
@@ -37,33 +43,35 @@ const login =async (req, res) => {
             if(result.rows[0].password!=null){
               const pass=result.rows[0].password;
               const username=result.rows[0].username;
-             
+              console.log(username);
               if(bcrypt.compareSync(password, pass)){
                
-                let tokens=jwtTokens(username);
-                console.log(tokens);
+                let tokens=jwtTokens({username,email});
+                
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
                 res.json(tokens);
                
+               
               }
               else{
-                res.send(errorMsg.error500());
-    
+                res.status(401).json({msg:'Thất bại'});
               }
             }
              else{
-              res.send(errorMsg.error500());
+              res.status(401).json({msg:'Thất bại'});
              }
             
           }
         );
       }
       else{
-        res.send(errorMsg.error500());
+        res.status(401).json({msg:'Thất bại'});
       }
       
     })
+
   
+    
     
   }
 };
@@ -111,7 +119,7 @@ const forgotPassword=async (req,res)=>{
     if(result.rows[0]!=null){
       const username=result.rows[0].username;
       const token = jwt.sign({ email, username }, "fotgotpassword");
-      pool.query('update users set token=($1) where email=($2) and username=($3)',[token,email,username],(error,result)=>{
+      pool.query('update users set token=($1),status=0 where email=($2) and username=($3)',[token,email,username],(error,result)=>{
         if(error) throw error;
         sendMail(email,'<form action="http://localhost:3001/api/users/resetPassword/"  method="POST"><input type="hidden" hidden value="'+token+'" name="_token"><br><label for="fname">Nhập mật khẩu mới</label><br><input type="text" name="password_new"><br><label for="lname">Nhập lại mật khẩu</label><br><input type="text" name="confirm_password"><button type="submit">Đổi mật khẩu</button></form>');
         res.send(200);
@@ -123,12 +131,33 @@ const forgotPassword=async (req,res)=>{
     }
     
   })
-
 }
 const resetPassword=async (req,res)=>{
-  const {_token,password_new}=req.body;
-  console.log(_token,password_new);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.json(errors);
+  }
+  else{
+    const {_token,password_new}=req.body;
+    await pool.query('select id from users where token=($1)',[_token],(error,result)=>{
+      if(error) throw error;
+      if(result.rows[0]!=null){
+        const id=result.rows[0].id;
+        var salt = bcrypt.genSaltSync(10);
+        var hashPassword = bcrypt.hashSync(password_new, salt);
+         pool.query('update users set token=($1),password=($2) where id=($3)',[null,hashPassword,id],(error,result)=>{
+          if(error) throw error;
+          res.status(200).send(errorMsg.sucess());
+        })
+      }
+      else{
+        res.status(500).send(errorMsg.error500());
+
+      }
+      
     
+    })
+  }  
 }
 const verifyEmail=async (req,res)=>{
   const token=req.params.token;
@@ -147,11 +176,32 @@ const verifyEmail=async (req,res)=>{
   })
 }
 
+const refreshToken=async (req,res)=>{
+  const refreshToken=req.cookies.refresh_token;
+  if(refreshToken==null)return res.status(401).json({error:'null refresh token'});
+  jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET,(error,result)=>{
+    if(error) return res.status(401).json({error:error.message});
+    let tokens=jwtTokens(result);
+    res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
+    res.json(tokens);
+  })
+ 
+
+}
+
+
+const deleteRefreshToken= async (req,res)=>{
+  res.clearCookie('refresh_token');
+  return res.status(200).json({message:'refresh_token delected'});
+
+}
 module.exports = {
   getUsers,
   register,
   login,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  refreshToken,
+  deleteRefreshToken
 };

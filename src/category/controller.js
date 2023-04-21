@@ -11,15 +11,20 @@ const getCategory=(req,res)=>{
 const addCategory=(req,res)=>{
     
     const {name}=req.body;
-    console.log(req.body);
+    
     pool.query('insert into category (name) values ($1)',[name],(error,result)=>{
         if(error) throw error;
-        res.status(200).send(`CSRF token used: ${req.body._csrf}, Message received: ${req.body.message}`);
+        res.status(200).json('Thêm thành công');
     })
 
+}
+const deleteCategory=(req,res)=>{
+    const id=req.params.id;
+    console.log(id);
 }
 
 module.exports={
     getCategory,
-    addCategory
+    addCategory,
+    deleteCategory
 }

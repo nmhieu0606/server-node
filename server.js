@@ -5,7 +5,7 @@ const categoryRoute=require('./src/category/routes');
 const permisionsRoute=require('./src/permisions/routes'); 
 const UsersRoute=require('./src/users/routes'); 
 const bodyParser = require('body-parser');
-
+var cors = require('cors');
 
 
 var session = require('express-session');
@@ -41,18 +41,33 @@ function availableRoutes() {
       });
   }
   
-console.log(JSON.stringify(availableRoutes(), null, 2));
-// app.get('/', (req, res) => {
-//     res.send(req.csrfToken());
-// });
+app.get('/', (req, res) => {
+    //res.send(req.csrfToken());
+   
+});
 
-app.get("/get-all-routes", (req, res) => {  
-    let get = app._router.stack.filter(r => r.route && r.route.methods.get).map(r => r.route.path);
-    let post = app._router.stack.filter(r => r.route && r.route.methods.post).map(r => r.route.path);
-    res.send({ get: get, post: post });
+app.use(function (req, res, next) {
+
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
 });
 app.use('/api/category',categoryRoute);
 app.use('/api/permisions',permisionsRoute);
 app.use('/api/users',UsersRoute);
-
+app.use(
+  cors({origin: ['http://localhost:3001', 'http://127.0.0.1:3001']})
+);
 app.listen(port,(req,res)=>{console.log('server running');})

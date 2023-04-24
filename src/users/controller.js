@@ -49,7 +49,8 @@ const login =async (req, res) => {
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
-                res.json(tokens);
+                res.json({tokens,user:{username,email}});
+               // res.json(username,email);
                
                
               }

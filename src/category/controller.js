@@ -2,6 +2,7 @@
 
 const pool=require('../../db');
 const getCategory=(req,res)=>{
+    //console.log(req);
     pool.query('select * from category',(error,result)=>{
         if(error) throw error;
         res.status(200).json(result.rows);

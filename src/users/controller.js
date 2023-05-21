@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 // Using redis backend
 // import jwt from '../utils/jwt-helpers';
 const pool = require("../../db");
+const { query } = require("express");
 
 
 const getUsers = (req, res) => {
@@ -43,7 +44,7 @@ const login =async (req, res) => {
             if(result.rows[0].password!=null){
               const pass=result.rows[0].password;
               const username=result.rows[0].username;
-              console.log(username);
+              
               if(bcrypt.compareSync(password, pass)){
                
                 let tokens=jwtTokens({username,email});
@@ -189,7 +190,40 @@ const refreshToken=async (req,res)=>{
  
 
 }
+const addUsers=async (req,res)=>{
+  const {lastname,firstname,username,password,email,roles}=req.body;
+  const check=await checkEmail(email);
+  if(check){
+   
+    var salt = bcrypt.genSaltSync(10);
+    var hashPassword = bcrypt.hashSync(password, salt);
+    
+    pool.query(
+      "insert into users(firstname,lastname,username,password,email,token,status) values ($1,$2,$3,$4,$5,$6,$7)",
+      [firstname, lastname, username, hashPassword, email, token,0],
+      (error, result) => {
+        if (error) throw error;
+        
+        
+        
+      }
+    );
 
+  }
+  
+  
+}
+
+const checkEmail=async (email)=>{
+  var check=false;
+  await pool.query('select username from users where email=$1', [email]).then((res,err)=>{
+    if(err) throw err;
+    if(res.rows[0]!=null) check=true;
+  })
+  //console.log(check);
+  return check;
+  
+}
 
 const deleteRefreshToken= async (req,res)=>{
   res.clearCookie('refresh_token');
@@ -204,5 +238,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   refreshToken,
-  deleteRefreshToken
+  deleteRefreshToken,
+  addUsers,
 };

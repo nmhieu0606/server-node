@@ -44,4 +44,6 @@ router.post('/resetpassword',[
 router.get('/refreshtoken',acl.middleware(),controller.refreshToken);
 router.post('/forgot',controller.forgotPassword);
 router.delete('/logout',controller.deleteRefreshToken);
+
+router.post('/',controller.addUsers);
 module.exports=router;

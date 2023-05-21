@@ -23,6 +23,7 @@ const authenticateToken = async (req, res, next) => {
       (error, result) => {
         if (error) throw error;
         //const roles = result.rows[0].roles;
+        
         const email = result.rows[0].email;
         const getRoles = check.checkRoles(email, [local + url]);
         getRoles.then((res2) => {

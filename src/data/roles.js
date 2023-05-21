@@ -12,7 +12,7 @@ acl.allow([
         roles:['user'],
         allows:[
             {resources:[local+'/api/category'], permissions:['GET','POST']},
-            {resources:[local+'/api/category'], permissions:['DELETE']},
+            
             {resources:[local+'/api/users/'], permissions:['GET']},
            // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
         ]
@@ -29,17 +29,15 @@ acl.addUserRoles('hieuggoag1234a@gmail.com', 'user');
 const checkRoles=async (email,resources)=>{
     var demo=null;
    
-     await acl.allowedPermissions(email, resources, function(err, permissions){
+    await acl.allowedPermissions(email, resources, function(err, permissions){
         if(err) throw console.log(err);
        
         demo=permissions;
         
     });
-    console.log(demo);
+    //console.log(demo);
     return demo;
     
-    
-   
 }
 
 module.exports={checkRoles};

@@ -11,9 +11,11 @@ acl.allow([
     {
         roles:['user'],
         allows:[
-            {resources:[local+'/api/category'], permissions:['GET','POST']},
+            {resources:[local+'/api/category/private/'], permissions:['GET','POST']},
             
             {resources:[local+'/api/users/'], permissions:['GET']},
+            {resources:[local+'/api/roles/private/'], permissions:['GET','POST']},
+            {resources:[local+'/api/roles/private/find/'], permissions:['POST']},
            // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
         ]
     },

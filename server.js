@@ -12,8 +12,8 @@ const expressListRoutes = require('express-list-routes');
 const routeList = require("express-routes-catalogue");
 const  {parseExpressApp} = require ('express-route-parser');
 
-var cors = require("cors");
 
+const cors = require('cors');
 var session = require("express-session");
 // const csurf = require('csurf');
 const cookieParser = require("cookie-parser");
@@ -50,7 +50,8 @@ function availableRoutes() {
       };
     });
 }
-
+app.use(cors())
+app.options('*', cors())
 app.get("/", (req, res) => {
   //res.send(req.csrfToken());
 });
@@ -78,6 +79,8 @@ app.use(function (req, res, next) {
   // Pass to next layer of middleware
   next();
 });
+
+
 app.use("/api/category", categoryRoute);
 app.use("/api/permisions", permisionsRoute);
 app.use("/api/users", UsersRoute);

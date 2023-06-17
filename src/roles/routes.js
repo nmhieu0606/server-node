@@ -4,5 +4,7 @@ const authenticateToken=require('../../middleware/authentication');
 const router=Router();
 router.get('/private/',authenticateToken,controller.getRoles);
 router.post('/private/',authenticateToken,controller.addRoles);
+router.post('/private/update/',authenticateToken,controller.updateRole);
 router.post('/private/find/',authenticateToken,controller.findRole);
+router.post('/private/destroy/',authenticateToken,controller.destroy);
 module.exports=router;

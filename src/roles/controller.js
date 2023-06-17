@@ -4,6 +4,7 @@ const pool=require('../../db');
 const express=require('express');
 const app=express();
 const expressListRoutes = require('express-list-routes');
+
 const getRoles=(req,res)=>{
     //console.log(req);
     pool.query('select * from roles',(error,result)=>{
@@ -23,14 +24,12 @@ const addRoles=(req,res)=>{
     });
 
 }
-const deleteCategory=(req,res)=>{
-    const id=req.params.id;
-    console.log(id);
-}
+
 const findRole=async (req,res)=>{
    
     const {id}=req.body;
     pool.query('select *from roles where id=$1',[id],(error,result)=>{
+        
         if(error) throw error;
         if(result.rows[0]!=null) res.json(result.rows[0]);
         else{
@@ -39,16 +38,39 @@ const findRole=async (req,res)=>{
        
     })
 }
+const updateRole=async (req,res)=>{
+    const {id,name,resources}=req.body;
+    pool.query('update roles set name=$1 ,resources=$2 where id=$3',[name,resources,id],(error,result)=>{
+        if(error) throw error;
+        res.json({
+            code:200,
+            msg:'Cập nhật thành công'
+        })
+        console.log(result.rows);
+    })
 
+}
 const getApi=(req,res)=>{
     
    
     
 }
+const destroy=(req,res)=>{
+    const {id}=req.body;
+    pool.query('delete from roles where id=$1',[id],(error,result)=>{
+        if(error) throw error,
+        res.json({
+            code:200,
+            msg:'Xóa thành công',
+        });
+    })
+}
 module.exports={
     getRoles,
     getApi,
     addRoles,
-    deleteCategory,
-    findRole
+    
+    findRole,
+    updateRole,
+    destroy
 }

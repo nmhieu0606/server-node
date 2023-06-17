@@ -4,7 +4,7 @@ var errorMsg=require('../error/msg')
 var sendMail= require('../../mail/sendmail')
 var jwtTokens =require('../utils/jwt-helpers')
 const jwt = require("jsonwebtoken");
-
+const check =require('../data/roles')
  
 // Using redis backend
 // import jwt from '../utils/jwt-helpers';
@@ -46,7 +46,7 @@ const login =async (req, res) => {
               const username=result.rows[0].username;
               
               if(bcrypt.compareSync(password, pass)){
-               
+                check.gantPermission(email,'user');
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});

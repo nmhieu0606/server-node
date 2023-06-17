@@ -58,29 +58,29 @@ acl.userRoles('hieuggoag1234a@gmail.com',(error,roles)=>{
     // console.log(roles);
 })
 getRoles();
-// acl.allow([
+acl.allow([
     
-//     {
-//         roles:['user'],
-//         allows:[
-//             {resources:[local+'/api/category/private/'], permissions:['GET','POST']},
+    {
+        roles:['user'],
+        allows:[
+            {resources:[local+'/api/category/private/'], permissions:['GET','POST']},
             
-//             {resources:[local+'/api/users/'], permissions:['GET']},
-//             {resources:[local+'/api/roles/private/'], permissions:['GET','POST']},
-//             {resources:[local+'/api/roles/private/update/'], permissions:['POST']},
-//             {resources:[local+'/api/roles/private/find/'], permissions:['POST']},
-//             {resources:[local+'/api/roles/private/destroy/'], permissions:['POST']},
-//            // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
-//         ]
-//     },
-//     {
-//         roles:['admin'],
-//         allows:[
-//             {resources:'user', permissions:['sell', 'exchange']},
-//             {resources:['account', 'deposit'], permissions:['put', 'delete']}
-//         ]
-//     }
-// ]);
+            {resources:[local+'/api/users/'], permissions:['GET']},
+            {resources:[local+'/api/roles/private/'], permissions:['GET','POST']},
+            {resources:[local+'/api/roles/private/update/'], permissions:['POST']},
+            {resources:[local+'/api/roles/private/find/'], permissions:['POST']},
+            {resources:[local+'/api/roles/private/destroy/'], permissions:['POST']},
+           // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
+        ]
+    },
+    {
+        roles:['admin'],
+        allows:[
+            {resources:'user', permissions:['sell', 'exchange']},
+            {resources:['account', 'deposit'], permissions:['put', 'delete']}
+        ]
+    }
+]);
 
 const gantPermission=async (email,role)=>{
     await  acl.addUserRoles(email, role);

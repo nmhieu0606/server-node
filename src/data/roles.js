@@ -1,27 +1,29 @@
 const pool=require('../../db');
-const role=require('../../src/roles/controller')
+
 
 var acl = require('acl');
+
 acl = new acl(new acl.memoryBackend(), {
     debug: (msg) => {
-      console.log('-DEBUG-', msg);
+        console.log('-DEBUG-', msg);
     }
 });
+
+
 const local='http://localhost:3001';
 
-const getRoles=async()=>{
-    //console.log(req);
+const updateRoleSV=async()=>{
+   
     var test=null;
     await pool.query('select * from roles').then(res=>{
         test=res.rows;
+        
     });
-    //console.log(test);
+    
     
     const av=await test.map((item)=>{
         const temp=JSON.parse(item.resources);
-    //   item.resources.map((i)=>{
-    //     console.log(i);
-    //   });
+   
       
 
         return{
@@ -41,16 +43,22 @@ const getRoles=async()=>{
    
 
    
-   
-    await av.map((item,index)=>{
+    await av.map((item)=>{
+        acl.removeRole(item.roles);
+    });
+    await av.map((item)=>{
+        //console.log(item.roles);
+       
         item.allows[0].map((i)=>{
-          acl.allow(item.roles,i.resources,i.permissions);
-           //console.log(item.roles);
+            
+            acl.allow(item.roles,i.resources,i.permissions);
+           
         })
-    })
+    });
+    console.log('Đã update quyền');
    
     console.log(acl.backend._buckets);
-   console.log(av[0].roles);
+    console.log(av[0].roles);
     
 }
 
@@ -84,7 +92,7 @@ acl.userRoles('hieuggoag1234a@gmail.com',(error,roles)=>{
 // ]);
 
 const gantPermission=async (email,role)=>{
-    getRoles();
+    updateRoleSV();
     await  acl.addUserRoles(email, role);
 }
 
@@ -102,4 +110,4 @@ const checkRoles=async (email,resources)=>{
     
 }
 
-module.exports={checkRoles,gantPermission,getRoles};
+module.exports={checkRoles,gantPermission,updateRoleSV};

@@ -4,7 +4,7 @@ const pool=require('../../db');
 const express=require('express');
 const app=express();
 const expressListRoutes = require('express-list-routes');
-const roldeData=require('../data/roles')
+const roleData =require('../../src/data/roles')
 
 const getRoles=(req,res)=>{
     //console.log(req);
@@ -21,7 +21,7 @@ const addRoles=(req,res)=>{
     
     pool.query('insert into roles (name,resources) values ($1,$2)',[name,resources],(error,result)=>{
         if(error) throw error;
-        getRoles();
+        
         res.status(200).json('Thêm thành công');
     });
 
@@ -44,7 +44,7 @@ const updateRole=async (req,res)=>{
     const {id,name,resources}=req.body;
     pool.query('update roles set name=$1 ,resources=$2 where id=$3',[name,resources,id],(error,result)=>{
         if(error) throw error;
-        //roldeData.getRoles();
+        roleData.updateRoleSV();
         res.json({
             code:200,
             msg:'Cập nhật thành công'
@@ -53,16 +53,12 @@ const updateRole=async (req,res)=>{
     })
 
 }
-const getApi=(req,res)=>{
-    
-   
-    
-}
+
 const destroy=(req,res)=>{
     const {id}=req.body;
     pool.query('delete from roles where id=$1',[id],(error,result)=>{
         if(error) throw error,
-        getRoles();
+        roleData
         res.json({
             code:200,
             msg:'Xóa thành công',
@@ -71,7 +67,7 @@ const destroy=(req,res)=>{
 }
 module.exports={
     getRoles,
-    getApi,
+    
     addRoles,
     
     findRole,

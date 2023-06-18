@@ -42,9 +42,10 @@ const getRoles=async()=>{
 
    
    
-    await av.map((item)=>{
-        item.allows.map((i)=>{
-            acl.allow(item.role,i.resources,i.permissions);
+    await av.map((item,index)=>{
+        item.allows[0].map((i)=>{
+          acl.allow(item.roles,i.resources,i.permissions);
+           //console.log(item.roles);
         })
     })
    
@@ -57,32 +58,33 @@ acl.userRoles('hieuggoag1234a@gmail.com',(error,roles)=>{
     // console.log(error);
     // console.log(roles);
 })
-getRoles();
-acl.allow([
+
+// acl.allow([
     
-    {
-        roles:['user'],
-        allows:[
-            {resources:[local+'/api/category/private/'], permissions:['GET','POST']},
+//     {
+//         roles:['user'],
+//         allows:[
+//             {resources:[local+'/api/category/private/'], permissions:['GET','POST']},
             
-            {resources:[local+'/api/users/'], permissions:['GET']},
-            {resources:[local+'/api/roles/private/'], permissions:['GET','POST']},
-            {resources:[local+'/api/roles/private/update/'], permissions:['POST']},
-            {resources:[local+'/api/roles/private/find/'], permissions:['POST']},
-            {resources:[local+'/api/roles/private/destroy/'], permissions:['POST']},
-           // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
-        ]
-    },
-    {
-        roles:['admin'],
-        allows:[
-            {resources:'user', permissions:['sell', 'exchange']},
-            {resources:['account', 'deposit'], permissions:['put', 'delete']}
-        ]
-    }
-]);
+//             {resources:[local+'/api/users/'], permissions:['GET']},
+//             {resources:[local+'/api/roles/private/'], permissions:['GET','POST']},
+//             {resources:[local+'/api/roles/private/update/'], permissions:['POST']},
+//             {resources:[local+'/api/roles/private/find/'], permissions:['POST']},
+//             {resources:[local+'/api/roles/private/destroy/'], permissions:['POST']},
+//            // {resources:['forums', 'news'], permissions:['get', 'put', 'delete']}
+//         ]
+//     },
+//     {
+//         roles:['admin'],
+//         allows:[
+//             {resources:'user', permissions:['sell', 'exchange']},
+//             {resources:['account', 'deposit'], permissions:['put', 'delete']}
+//         ]
+//     }
+// ]);
 
 const gantPermission=async (email,role)=>{
+    getRoles();
     await  acl.addUserRoles(email, role);
 }
 
@@ -100,4 +102,4 @@ const checkRoles=async (email,resources)=>{
     
 }
 
-module.exports={checkRoles,gantPermission};
+module.exports={checkRoles,gantPermission,getRoles};

@@ -35,7 +35,7 @@ const login =async (req, res) => {
       if(error) throw error;
       if(result.rows[0]!=null){
         pool.query(
-          "select password,username from users where email=($1) and status=1",
+          "select password,username,roles from users where email=($1) and status=1",
           [email],
           (error, result) => {
            
@@ -44,9 +44,9 @@ const login =async (req, res) => {
             if(result.rows[0].password!=null){
               const pass=result.rows[0].password;
               const username=result.rows[0].username;
-              
+              const role=result.rows[0].roles;
               if(bcrypt.compareSync(password, pass)){
-                check.gantPermission(email,'user');
+                check.gantPermission(email,role);
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
@@ -213,6 +213,20 @@ const addUsers=async (req,res)=>{
   }
   
   
+}
+
+const findRoleUser=async(email)=>{
+   
+  const {id}=req.body;
+  await pool.query('select *from roles where id=$1',[id],(error,result)=>{
+      
+      if(error) throw error;
+      if(result.rows[0]!=null) res.json(result.rows[0]);
+      else{
+           res.json('Không tìm thấy kết quả');
+      }
+     
+  })
 }
 
 const checkEmail=async (email)=>{

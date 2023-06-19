@@ -1,3 +1,4 @@
+const { promises } = require('nodemailer/lib/xoauth2');
 const pool=require('../../db');
 
 
@@ -43,9 +44,18 @@ const updateRoleSV=async()=>{
    
 
    
-    await av.map((item)=>{
-        acl.removeRole(item.roles);
-    });
+   
+
+    await Promise.all(
+        av.map(async (item) => {
+          await acl.removeRole(item.roles);
+        })
+    )
+    
+    
+    // av.map((item)=>{
+       
+    // });
     await av.map((item)=>{
         //console.log(item.roles);
        

@@ -6,14 +6,13 @@ const authenticateToken=require('../../middleware/authentication');
 const router=Router();
 
 
-var roles=require('../data/roles');
 var acl = require('acl');
 acl = new acl(new acl.memoryBackend());
 
 
 
 
-router.get('/',authenticateToken,controller.getUsers);
+router.get('/private/',authenticateToken,controller.getUsers);
 router.post('/login',[ 
     check('email', 'Email length should be 10 to 30 characters').isLength({ min: 10, max: 1000 }).notEmpty(),
     check('password', 'Password length should be 8 to 10 characters')
@@ -46,4 +45,6 @@ router.post('/forgot',controller.forgotPassword);
 router.delete('/logout',controller.deleteRefreshToken);
 
 router.post('/',controller.addUsers);
+router.post('/private/find/',authenticateToken,controller.findUser);
+router.post('/private/updateStatus/',authenticateToken,controller.updateStatus);
 module.exports=router;

@@ -11,6 +11,7 @@ const router=Router();
 const expressListRoutes = require('express-list-routes');
 const routeList = require("express-routes-catalogue");
 const  {parseExpressApp} = require ('express-route-parser');
+const middleware=require('./middleware/authentication')
 
 
 const cors = require('cors');
@@ -86,14 +87,18 @@ app.use("/api/permisions", permisionsRoute);
 app.use("/api/users", UsersRoute);
 app.use("/api/roles", rolesRoute);
 app.use(cors({ origin: ["http://localhost:3001", "http://127.0.0.1:3001"] }));
-app.use("/api/getPermission", (req, res) => {
+app.use("/api/getPermission/private/",middleware, (req, res) => {
     const parsed = parseExpressApp(app);
     //console.log(parsed);
  // const local=process.env.LOCAL_SERVER_CUSTOM;
+    const root={path:'/api/getPermission/private/',method:'GET'}
+    parsed.push(root);
     const allApi=parsed.filter((r)=>{
        const d= r.path.search('private');
        if (d>0) {
+        //console.log(r);
         return r;
+        
         
        }
 

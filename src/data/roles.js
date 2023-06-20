@@ -65,10 +65,10 @@ const updateRoleSV=async()=>{
            
         })
     });
-    console.log('Đã update quyền');
+    // console.log('Đã update quyền');
    
-    console.log(acl.backend._buckets);
-    console.log(av[0].roles);
+    //console.log(acl.backend._buckets);
+    // console.log(av[0].roles);
     
 }
 
@@ -103,7 +103,7 @@ acl.userRoles('hieuggoag1234a@gmail.com',(error,roles)=>{
 
 const gantPermission=async (email,role)=>{
     updateRoleSV();
-    await  acl.addUserRoles(email, role);
+    await  acl.addUserRoles(email,role);
 }
 
 const checkRoles=async (email,resources)=>{
@@ -115,7 +115,7 @@ const checkRoles=async (email,resources)=>{
         demo=permissions;
         
     });
-    console.log(demo);
+   // console.log(demo);
     return demo;
     
 }

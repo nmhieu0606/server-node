@@ -45,8 +45,9 @@ const login =async (req, res) => {
               const pass=result.rows[0].password;
               const username=result.rows[0].username;
               const role=result.rows[0].roles;
+              console.log(role);
               if(bcrypt.compareSync(password, pass)){
-                check.gantPermission(email,role);
+                check.gantPermission(email.trim(),role.trim());
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
@@ -215,19 +216,19 @@ const addUsers=async (req,res)=>{
   
 }
 
-const findRoleUser=async(email)=>{
+// const findRoleUser=async(email)=>{
    
-  const {id}=req.body;
-  await pool.query('select *from roles where id=$1',[id],(error,result)=>{
+//   const {id}=req.body;
+//   await pool.query('select *from roles where id=$1',[id],(error,result)=>{
       
-      if(error) throw error;
-      if(result.rows[0]!=null) res.json(result.rows[0]);
-      else{
-           res.json('Không tìm thấy kết quả');
-      }
+//       if(error) throw error;
+//       if(result.rows[0]!=null) res.json(result.rows[0]);
+//       else{
+//            res.json('Không tìm thấy kết quả');
+//       }
      
-  })
-}
+//   })
+// }
 
 const checkEmail=async (email)=>{
   var check=false;
@@ -245,6 +246,61 @@ const deleteRefreshToken= async (req,res)=>{
   return res.status(200).json({message:'refresh_token delected'});
 
 }
+const findUser=async (req,res)=>{
+   
+  const {id}=req.body;
+  //console.log(id);
+  pool.query('select *from users where id=$1 ',[id],(error,result)=>{
+      
+      if(error) throw error;
+      if(result.rows[0]!=null) res.json(result.rows[0]);
+      else{
+           res.json('Không tìm thấy kết quả');
+      }
+     
+  })
+}
+
+const updateUser=async (req,res)=>{
+  const {id,lastname,firstname,username,password,email,status,role}=req.body;
+
+  const check=await checkEmail(email);
+  if(check){
+
+    var salt = bcrypt.genSaltSync(10);
+    var hashPassword = bcrypt.hashSync(password, salt);
+    pool.query('update users set lastname=$1 ,firstname=$2, username=$3,password=$4,email=$5,status=$6,roles=$7 where id=$8',
+    [lastname,firstname,username,hashPassword,email,status,role,id],(error,result)=>{
+        if(error) throw error;
+        roleData.updateRoleSV();
+        res.json({
+            code:200,
+            msg:'Cập nhật thành công'
+        })
+       
+    })
+
+
+  }
+ 
+
+}
+
+const updateStatus=async (req,res)=>{
+  const {id,status}=req.body;
+  // console.log(id,status);
+  pool.query('update users set status=$1 where id=$2',[status,id],(error,result)=>{
+      if(error) throw error;
+      
+      res.json({
+          code:200,
+          msg:'Cập nhật thành công'
+      })
+      
+  })
+
+}
+
 module.exports = {
   getUsers,
   register,
@@ -255,4 +311,6 @@ module.exports = {
   refreshToken,
   deleteRefreshToken,
   addUsers,
+  findUser,
+  updateStatus
 };

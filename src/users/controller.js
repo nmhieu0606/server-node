@@ -4,7 +4,7 @@ var errorMsg=require('../error/msg')
 var sendMail= require('../../mail/sendmail')
 var jwtTokens =require('../utils/jwt-helpers')
 const jwt = require("jsonwebtoken");
-const check =require('../data/roles')
+const roleData =require('../../src/data/roles')
  
 // Using redis backend
 // import jwt from '../utils/jwt-helpers';
@@ -47,7 +47,7 @@ const login =async (req, res) => {
               const role=result.rows[0].roles;
               console.log(role);
               if(bcrypt.compareSync(password, pass)){
-                check.gantPermission(email.trim(),role.trim());
+                roleData.gantPermission(email.trim(),role.trim());
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
@@ -241,6 +241,24 @@ const checkEmail=async (email)=>{
   
 }
 
+const checkEmailUpdateUser=async (email)=>{
+  var check=false;
+  await pool.query('select username,email from users where email=$1', [email]).then((res,err)=>{
+    console.log(res.rows[0].email);
+    if(err) throw err;
+    if(res.rows[0]==null)check=true;
+    if(res.rows[0].email==email){
+      check=true;
+    }
+    else{
+      check=false;
+    }
+  })
+  //console.log(check);
+  return check;
+  
+}
+
 const deleteRefreshToken= async (req,res)=>{
   res.clearCookie('refresh_token');
   return res.status(200).json({message:'refresh_token delected'});
@@ -262,15 +280,14 @@ const findUser=async (req,res)=>{
 }
 
 const updateUser=async (req,res)=>{
-  const {id,lastname,firstname,username,password,email,status,role}=req.body;
-
-  const check=await checkEmail(email);
+  const {id,lastname,firstname,username,password,email,status,roles}=req.body;
+  
+  const check=await checkEmailUpdateUser(email);
   if(check){
-
     var salt = bcrypt.genSaltSync(10);
     var hashPassword = bcrypt.hashSync(password, salt);
     pool.query('update users set lastname=$1 ,firstname=$2, username=$3,password=$4,email=$5,status=$6,roles=$7 where id=$8',
-    [lastname,firstname,username,hashPassword,email,status,role,id],(error,result)=>{
+    [lastname,firstname,username,hashPassword,email,status,roles,id],(error,result)=>{
         if(error) throw error;
         roleData.updateRoleSV();
         res.json({
@@ -279,7 +296,12 @@ const updateUser=async (req,res)=>{
         })
        
     })
-
+  }
+  else{
+    res.json({
+      code:500,
+      msg:'Email đã tồn tại',
+    })
 
   }
  
@@ -299,6 +321,23 @@ const updateStatus=async (req,res)=>{
       
   })
 
+
+  
+}
+
+const destroy=async (req,res)=>{
+  const {id}=req.body;
+ //console.log(id);
+  pool.query('delete from users where id=$1',[id],(error,result)=>{
+      if(error) throw error;
+      
+      res.json({
+          code:200,
+          msg:'Xoa user thành công'
+      })
+      
+  })
+
 }
 
 module.exports = {
@@ -312,5 +351,7 @@ module.exports = {
   deleteRefreshToken,
   addUsers,
   findUser,
-  updateStatus
+  updateStatus,
+  updateUser,
+  destroy,
 };

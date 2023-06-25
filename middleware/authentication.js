@@ -24,7 +24,7 @@ const authenticateToken = async (req, res, next) => {
         if (error) throw error;
         //const roles = result.rows[0].roles;
         
-        const email = result.rows[0].email;
+        const email = result.rows[0].email.trim();
         const getRoles = check.checkRoles(email, [local + url]);
         getRoles.then((res2) => {
           const value = Object.values(res2);

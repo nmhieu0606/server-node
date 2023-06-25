@@ -18,7 +18,6 @@ const updateRoleSV=async()=>{
     var test=null;
     await pool.query('select * from roles').then(res=>{
         test=res.rows;
-        
     });
     
     
@@ -32,8 +31,8 @@ const updateRoleSV=async()=>{
             allows:[
                 temp.map((i)=>{
                     return{
-                        resources:local+i.path,
-                        permissions:i.method
+                        resources:local+i.path.trim(),
+                        permissions:i.method.trim()
                     }
                 })
 
@@ -67,7 +66,7 @@ const updateRoleSV=async()=>{
     });
     // console.log('Đã update quyền');
    
-    //console.log(acl.backend._buckets);
+    // console.log(acl.backend._buckets);
     // console.log(av[0].roles);
     
 }
@@ -115,7 +114,7 @@ const checkRoles=async (email,resources)=>{
         demo=permissions;
         
     });
-   // console.log(demo);
+   console.log(demo);
     return demo;
     
 }

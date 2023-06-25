@@ -47,4 +47,6 @@ router.delete('/logout',controller.deleteRefreshToken);
 router.post('/',controller.addUsers);
 router.post('/private/find/',authenticateToken,controller.findUser);
 router.post('/private/updateStatus/',authenticateToken,controller.updateStatus);
+router.post('/private/update/',authenticateToken,controller.updateUser);
+router.post('/private/destroy/',authenticateToken,controller.destroy);
 module.exports=router;

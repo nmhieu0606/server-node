@@ -5,10 +5,26 @@ const express=require('express');
 const app=express();
 const expressListRoutes = require('express-list-routes');
 const roleData =require('../../src/data/roles')
-
-const getRoles=(req,res)=>{
+const PAGE_SIZE=1;
+const getRoles=async (req,res)=>{
     //console.log(req);
-    pool.query('select * from roles',(error,result)=>{
+
+    let sum,tongSoPage;
+    var request=req.body.page!=null?req.body.page:1;
+  
+    var offset=(request-1)*PAGE_SIZE;
+    //console.log(offset);
+    
+  
+    
+    await pool.query("select count(id) from roles").then((res)=>{
+      //console.log(res.rows[0].count);
+      sum=res.rows[0].count;
+    });
+
+
+
+    pool.query('select * from roles limit $1 offset $2',[PAGE_SIZE,offset],(error,result)=>{
         if(error) throw error;
         res.status(200).json(result.rows);
     });

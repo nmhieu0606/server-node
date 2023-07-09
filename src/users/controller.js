@@ -10,11 +10,28 @@ const roleData =require('../../src/data/roles')
 // import jwt from '../utils/jwt-helpers';
 const pool = require("../../db");
 const { query } = require("express");
+const PAGE_SIZE = 1;
 
+const getUsers =async (req, res) => {
+  //console.log(req.body.page);
+  let sum,tongSoPage;
+  var request=req.body.page!=null?req.body.page:1;
 
-const getUsers = (req, res) => {
+  var offset=(request-1)*PAGE_SIZE;
+  //console.log(offset);
   
-  pool.query("select * from users", (error, result) => {
+
+  
+  await pool.query("select count(id) from users").then((res)=>{
+    //console.log(res.rows[0].count);
+    sum=res.rows[0].count;
+  });
+  
+  
+
+
+
+  pool.query("select * from users limit $1 offset $2",[PAGE_SIZE,offset], (error, result) => {
     if (error) throw error;
     res.status(200).json(result.rows);
   });
@@ -45,9 +62,13 @@ const login =async (req, res) => {
               const pass=result.rows[0].password;
               const username=result.rows[0].username;
               const role=result.rows[0].roles;
-              console.log(role);
+             
+              
               if(bcrypt.compareSync(password, pass)){
-                roleData.gantPermission(email.trim(),role.trim());
+                findRole(role).then((res)=>{
+                  roleData.gantPermission(email.trim(),res.trim());
+                })
+               
                 let tokens=jwtTokens({username,email});
                 
                 res.cookie('refresh_token',tokens.refreshToken,{httpOnly:true});
@@ -80,6 +101,15 @@ const login =async (req, res) => {
   }
 };
 
+const findRole=async(id)=>{
+  var role=null;
+   await pool.query('select name from roles where id=$1 ',[id]).then((res,error)=>{
+    
+    role=res.rows[0].name;
+  });
+ 
+  return role;
+}
 const register =async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -193,24 +223,34 @@ const refreshToken=async (req,res)=>{
 
 }
 const addUsers=async (req,res)=>{
-  const {lastname,firstname,username,password,email,roles}=req.body;
+  const {lastname,firstname,username,password,email,role}=req.body;
+ 
   const check=await checkEmail(email);
   if(check){
    
     var salt = bcrypt.genSaltSync(10);
     var hashPassword = bcrypt.hashSync(password, salt);
     
-    pool.query(
-      "insert into users(firstname,lastname,username,password,email,token,status) values ($1,$2,$3,$4,$5,$6,$7)",
-      [firstname, lastname, username, hashPassword, email, token,0],
+    await pool.query(
+      "insert into users(firstname,lastname,username,password,email,status,roles) values ($1,$2,$3,$4,$5,$6,$7)",
+                        [firstname, lastname, username, hashPassword, email, 0,role],
       (error, result) => {
         if (error) throw error;
-        
+        res.json({
+          code:200,
+          msg:'Thêm thành công'
+        })
         
         
       }
     );
 
+  }
+  else{
+    res.json({
+      code:500,
+      msg:'email đã tồn tại'
+    })
   }
   
   
@@ -234,7 +274,7 @@ const checkEmail=async (email)=>{
   var check=false;
   await pool.query('select username from users where email=$1', [email]).then((res,err)=>{
     if(err) throw err;
-    if(res.rows[0]!=null) check=true;
+    if(res.rows[0]==null) check=true;
   })
   //console.log(check);
   return check;
@@ -247,12 +287,6 @@ const checkEmailUpdateUser=async (email)=>{
     console.log(res.rows[0].email);
     if(err) throw err;
     if(res.rows[0]==null)check=true;
-    if(res.rows[0].email==email){
-      check=true;
-    }
-    else{
-      check=false;
-    }
   })
   //console.log(check);
   return check;

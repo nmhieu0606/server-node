@@ -12,7 +12,7 @@ acl = new acl(new acl.memoryBackend());
 
 
 
-router.get('/private/',authenticateToken,controller.getUsers);
+router.post('/private/',authenticateToken,controller.getUsers);
 router.post('/login',[ 
     check('email', 'Email length should be 10 to 30 characters').isLength({ min: 10, max: 1000 }).notEmpty(),
     check('password', 'Password length should be 8 to 10 characters')
@@ -44,7 +44,7 @@ router.get('/refreshtoken',acl.middleware(),controller.refreshToken);
 router.post('/forgot',controller.forgotPassword);
 router.delete('/logout',controller.deleteRefreshToken);
 
-router.post('/',controller.addUsers);
+router.post('/private/',authenticateToken,controller.addUsers);
 router.post('/private/find/',authenticateToken,controller.findUser);
 router.post('/private/updateStatus/',authenticateToken,controller.updateStatus);
 router.post('/private/update/',authenticateToken,controller.updateUser);

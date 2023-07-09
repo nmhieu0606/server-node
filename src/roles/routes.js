@@ -2,7 +2,7 @@ const {Router}=require('express');
 const controller=require('./controller');
 const authenticateToken=require('../../middleware/authentication');
 const router=Router();
-router.get('/private/',authenticateToken,controller.getRoles);
+router.post('/private/',authenticateToken,controller.getRoles);
 router.post('/private/',authenticateToken,controller.addRoles);
 router.post('/private/update/',authenticateToken,controller.updateRole);
 router.post('/private/find/',authenticateToken,controller.findRole);
